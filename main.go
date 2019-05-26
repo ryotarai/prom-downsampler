@@ -95,6 +95,8 @@ func _main() error {
 		return errors.Wrap(err, "add symbols in an index")
 	}
 
+	var droppedSamples uint64
+	var appendedSamples uint64
 	var globalMaxTime int64
 
 	toPostings := index.NewMemPostings()
@@ -139,6 +141,9 @@ func _main() error {
 					if globalMaxTime < t {
 						globalMaxTime = t
 					}
+					appendedSamples++
+				} else {
+					droppedSamples++
 				}
 			}
 			if err := iter.Err(); err != nil {
@@ -212,6 +217,10 @@ func _main() error {
 	}
 
 	log.Printf("[INFO] Downsampling completed. A block has been created at %s", outputPath)
+	log.Printf("[INFO] %v", map[string]uint64{
+		"appendedSamples": appendedSamples,
+		"droppedSamples":  droppedSamples,
+	})
 
 	return nil
 }
